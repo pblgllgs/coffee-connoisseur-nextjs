@@ -6,7 +6,7 @@ import styles from '../styles/Home.module.css';
 
 import coffeeStores from '../data/coffee-stores.json';
 
-export default function Home() {
+export default function Home({ coffeeStores }) {
   const handleOnBannerBtnClick = () => {
     console.log('Holaa Btn');
   };
@@ -30,18 +30,38 @@ export default function Home() {
             height={400}
           />
         </div>
-        <div className={styles.cardLayout}>
-          {coffeeStores.map((store) => {
-            return <Card
-              key={store.id}
-              href="/coffee-store/darkhorse-coffee"
-              name={store.name}
-              imgUrl={store.imgUrl}
-              className={styles.card}
-            />;
-          })}
-        </div>
+        {coffeeStores.length && (
+          <>
+            <h2 className={styles.heading2}>Toronto stores</h2>
+            <div className={styles.cardLayout}>
+              {coffeeStores.map((store) => {
+                return (
+                  <Card
+                    key={store.id}
+                    href={`/coffee-store/${store.id}`}
+                    name={store.name}
+                    imgUrl={store.imgUrl}
+                    className={styles.card}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
 }
+
+// You should use getStaticProps when:
+//- The data required to render the page is available at build time ahead of a user’s request.
+//- The data comes from a headless CMS.
+//- The data can be publicly cached (not user-specific).
+//- The page must be pre-rendered (for SEO) and be very fast — getStaticProps generates HTML and JSON files, both of which can be cached by a CDN for performance.
+export const getStaticProps = async () => {
+  return {
+    props: {
+      coffeeStores,
+    },
+  };
+};
