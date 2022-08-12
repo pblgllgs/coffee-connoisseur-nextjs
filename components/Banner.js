@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './Banner.module.css';
 
 const Banner = (props) => {
@@ -8,7 +7,7 @@ const Banner = (props) => {
         <span className={styles.title1}>Coffee</span>
         <span className={styles.title2}>Connoisseur</span>
       </h1>
-      <p className={styles.subTitle}>Discover you local coffe shops!!</p>
+      <p className={styles.subTitle}>Discover you local coffee shops!!</p>
       <div className={styles.buttonWrapper}>
         <button onClick={props.handleOnClick} className={styles.button}>
           {props.buttonText}
