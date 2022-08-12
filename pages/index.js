@@ -4,9 +4,11 @@ import Banner from '../components/Banner';
 import Card from '../components/Card';
 import styles from '../styles/Home.module.css';
 
-import coffeeStores from '../data/coffee-stores.json';
+import axios from 'axios';
+import { normalize } from '../utils/normalize';
 
 export default function Home({ coffeeStores }) {
+  console.log(coffeeStores);
   const handleOnBannerBtnClick = () => {
     console.log('Holaa Btn');
   };
@@ -37,10 +39,10 @@ export default function Home({ coffeeStores }) {
               {coffeeStores.map((store) => {
                 return (
                   <Card
-                    key={store.id}
-                    href={`/coffee-store/${store.id}`}
+                    key={store.fsq_id}
+                    href={`/coffee-store/${store.fsq_id}`}
                     name={store.name}
-                    imgUrl={store.imgUrl}
+                    imgUrl={store.imgUrl.imgUrl}
                     className={styles.card}
                   />
                 );
@@ -59,9 +61,24 @@ export default function Home({ coffeeStores }) {
 //- The data can be publicly cached (not user-specific).
 //- The page must be pre-rendered (for SEO) and be very fast — getStaticProps generates HTML and JSON files, both of which can be cached by a CDN for performance.
 export const getStaticProps = async () => {
+  const options = {
+    url: 'https://api.foursquare.com/v3/places/search',
+    headers: {
+      Authorization: 'fsq3g3Hm1u7eF1OQBIaU4maTD9yQY/flEYrdWbTjizPQp/Q=',
+    },
+  };
+  const { data } = await axios.request(options);
+  const { results } = data;
+  const imgs = await Promise.all(normalize(results));
+  const resp = results.map((result) => {
+    return {
+      ...result,
+      imgUrl: imgs.find((img) => img.fsq_id === result.fsq_id),
+    };
+  })
   return {
     props: {
-      coffeeStores,
+      coffeeStores: resp,
     },
   };
 };
