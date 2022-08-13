@@ -6,12 +6,34 @@ import styles from '../../styles/coffee-store.module.css';
 import cls from 'classnames';
 import axios from 'axios';
 import { getCommets, getPlace } from '../../utils/normalize';
+import { useContext, useEffect, useState } from 'react';
+import { StoreContext } from '../_app';
+import { isEmpty } from '../../utils/index';
 
-const CoffeeStore = ({ coffeeStore }) => {
+const CoffeeStore = (initialProps) => {
   const router = useRouter();
   if (router.isFallback) {
     return <div>Loading...</div>;
   }
+  const id = router.query.id;
+
+  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+
+  const {
+    state: { coffeeStores }
+  } = useContext(StoreContext);
+
+  useEffect(() => {
+    if (isEmpty(initialProps.coffeeStore)) {
+      if (coffeeStores.length > 0) {
+        const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
+          return coffeeStore.fsq_id === id;
+        });
+        setCoffeeStore(findCoffeeStoreById);
+      }
+    }
+  }, [id]);
+
   const { location, name, img, commets } = coffeeStore;
   const handleUpvoteButton = () => {
     console.log('handle');
@@ -31,7 +53,16 @@ const CoffeeStore = ({ coffeeStore }) => {
           <div className={styles.nameWrapper}>
             <h1 className={styles.name}>{name}</h1>
           </div>
-          <Image src={img.imgUrl} alt={name} width={600} height={360} className={styles.storeImg} />
+          <Image
+            src={
+              img.imgUrl ||
+              'https://gastronomiaycia.republica.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2021/12/lista_bar_2021_Schmucks-680x429.jpg.webp'
+            }
+            alt={name}
+            width={600}
+            height={360}
+            className={styles.storeImg}
+          />
         </div>
 
         <div className={cls('glass', styles.col2)}>
@@ -79,6 +110,7 @@ export const getStaticPaths = async () => {
   };
   const { data } = await axios.request(options);
   const { results } = data;
+
   const idArr = results.map((store) => String(store.fsq_id));
   return {
     paths: idArr.map((id) => ({
@@ -105,7 +137,7 @@ export const getStaticProps = async ({ params }) => {
   };
   return {
     props: {
-      coffeeStore: respuesta
+      coffeeStore: respuesta ? respuesta : {}
     }
   };
 };
