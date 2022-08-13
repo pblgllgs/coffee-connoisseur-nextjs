@@ -62,9 +62,9 @@ export const getCommets = async (id) => {
   return data;
 };
 
-export const getPlaces = async () => {
+export const getPlaces = async (latlong = '41.8781,-87.6298') => {
   const options = {
-    url: 'https://api.foursquare.com/v3/places/search?limit=6',
+    url: `https://api.foursquare.com/v3/places/search?limit=6&ll=${latlong}`,
     headers: {
       Authorization: process.env.NEXT_PUBLIC_AUTHORIZATION,
     },
