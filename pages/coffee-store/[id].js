@@ -5,15 +5,14 @@ import { useRouter } from 'next/router';
 import styles from '../../styles/coffee-store.module.css';
 import cls from 'classnames';
 import axios from 'axios';
-import { normalizev2 } from '../../utils/normalize';
+import { getCommets, getPlace, normalizev2 } from '../../utils/normalize';
 
 const CoffeeStore = ({ coffeeStore }) => {
   const router = useRouter();
   if (router.isFallback) {
     return <div>Loading...</div>;
   }
-  const { fsq_id, location, country, name, img } = coffeeStore;
-   console.log(img.imgUrl);
+  const { location, name, img, commets } = coffeeStore;
   const handleUpvoteButton = () => {
     console.log('handle');
   };
@@ -26,7 +25,7 @@ const CoffeeStore = ({ coffeeStore }) => {
         <div className={styles.col1}>
           <div className={styles.backToHomeLink}>
             <Link href="/">
-              <a>Back to Home</a>
+              <a>←Back to Home</a>
             </Link>
           </div>
           <div className={styles.nameWrapper}>
@@ -40,6 +39,7 @@ const CoffeeStore = ({ coffeeStore }) => {
             className={styles.storeImg}
           />
         </div>
+
         <div className={cls('glass', styles.col2)}>
           <div className={styles.iconWrapper}>
             <Image
@@ -57,7 +57,9 @@ const CoffeeStore = ({ coffeeStore }) => {
               height={24}
               alt={'icon'}
             />
-            <p className={styles.text}>{location.country === 'CL' ? 'Chile': ''}</p>
+            <p className={styles.text}>
+              {location.country === 'CL' ? 'Chile' : ''}
+            </p>
           </div>
           <div className={styles.iconWrapper}>
             <Image
@@ -71,6 +73,17 @@ const CoffeeStore = ({ coffeeStore }) => {
           <button className={styles.upvoteButton} onClick={handleUpvoteButton}>
             Vote!!
           </button>
+          <div className={styles.iconWrapper}>
+            {commets.length > 0 &&
+              commets.slice(0,2).map((comment) => {
+                return (
+                  <div key={comment.created_at}>
+                    <p className={styles.textComments}>{comment.created_at}</p>
+                    <p className={styles.textComments}>{comment.text}</p>
+                  </div>
+                );
+              })}
+          </div>
         </div>
       </div>
     </div>
@@ -84,7 +97,7 @@ export const getStaticPaths = async () => {
   const options = {
     url: 'https://api.foursquare.com/v3/places/search',
     headers: {
-      Authorization: 'fsq3g3Hm1u7eF1OQBIaU4maTD9yQY/flEYrdWbTjizPQp/Q=',
+      Authorization: process.env.NEXT_PUBLIC_AUTHORIZATION,
     },
   };
   const { data } = await axios.request(options);
@@ -107,22 +120,15 @@ export const getStaticPaths = async () => {
 //- The page must be pre-rendered (for SEO) and be very fast — getStaticProps generates HTML and JSON files, both of which can be cached by a CDN for performance.
 export const getStaticProps = async ({ params }) => {
   const { id } = params;
-  console.log(id);
-  const options = {
-    url: `https://api.foursquare.com/v3/places/${id}`,
-    headers: {
-      Authorization: 'fsq3g3Hm1u7eF1OQBIaU4maTD9yQY/flEYrdWbTjizPQp/Q=',
-    },
-  };
-  const { data } = await axios.request(options);
-  const img = await normalizev2(data);
-  const resp = {
-    ...data,
-    img
+  const resp = await getPlace(id);
+  const commets = await getCommets(id);
+  const respuesta = {
+    ...resp,
+    commets,
   };
   return {
     props: {
-      coffeeStore: resp,
+      coffeeStore: respuesta,
     },
   };
 };

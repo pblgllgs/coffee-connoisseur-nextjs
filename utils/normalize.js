@@ -4,7 +4,7 @@ export const imgSearch = async (place) => {
   const options = {
     url: `https://api.foursquare.com/v3/places/${place.fsq_id}/photos`,
     headers: {
-      Authorization: 'fsq3g3Hm1u7eF1OQBIaU4maTD9yQY/flEYrdWbTjizPQp/Q=',
+      Authorization: process.env.NEXT_PUBLIC_AUTHORIZATION,
     },
     method: 'GET',
   };
@@ -33,4 +33,50 @@ export const normalizev2 = async (place) => {
     fsq_id: place.fsq_id,
     imgUrl: img,
   };
+};
+
+export const getPlace = async (id) => {
+  const options = {
+    url: `https://api.foursquare.com/v3/places/${id}`,
+    headers: {
+      Authorization: process.env.NEXT_PUBLIC_AUTHORIZATION,
+    },
+  };
+  const { data } = await axios.request(options);
+  const img = await normalizev2(data);
+  const resp = {
+    ...data,
+    img,
+  };
+  return resp;
+};
+
+export const getCommets = async (id) => {
+  const options = {
+    url: `https://api.foursquare.com/v3/places/${id}/tips`,
+    headers: {
+      Authorization: process.env.NEXT_PUBLIC_AUTHORIZATION,
+    },
+  };
+  const { data } = await axios.request(options);
+  return data;
+};
+
+export const getPlaces = async () => {
+  const options = {
+    url: 'https://api.foursquare.com/v3/places/search?limit=6',
+    headers: {
+      Authorization: process.env.NEXT_PUBLIC_AUTHORIZATION,
+    },
+  };
+  const { data } = await axios.request(options);
+  const { results } = data;
+  const imgs = await Promise.all(normalize(results));
+  const resp = results.map((result) => {
+    return {
+      ...result,
+      imgUrl: imgs.find((img) => img.fsq_id === result.fsq_id),
+    };
+  });
+  return resp;
 };

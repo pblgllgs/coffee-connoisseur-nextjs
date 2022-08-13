@@ -77,6 +77,14 @@
   font-weight: 700;
 }
 
+.textComments {
+  padding-left: 0.5rem /* 8px */;
+  font-size: 1rem /* 24px */;
+  line-height: 2rem /* 32px */;
+  margin: 0;
+  font-weight: 400;
+}
+
 .upvoteButton {
   width: fit-content;
   color: var(--text-white-100);
