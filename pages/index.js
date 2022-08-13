@@ -8,8 +8,7 @@ import { getPlaces } from '../utils/normalize';
 import { useEffect, useState } from 'react';
 
 export default function Home({ coffeeStores }) {
-  const { handleTrackLocation, latLong, locationErrorMsg, isFindingLocation } =
-    useTrackLocation();
+  const { handleTrackLocation, latLong, locationErrorMsg, isFindingLocation } = useTrackLocation();
   const [coffeeStoresByLocation, setCoffeeStoresByLocation] = useState('');
   const [coffeeStoresByLocationError, setCoffeeStoresByLocationError] = useState(null);
   const handleOnBannerBtnClick = () => {
@@ -42,19 +41,12 @@ export default function Home({ coffeeStores }) {
       <main className={styles.main}>
         <Banner
           handleOnClick={handleOnBannerBtnClick}
-          buttonText={
-            isFindingLocation ? 'Locating...' : 'View stores nearby!!'
-          }
+          buttonText={isFindingLocation ? 'Locating...' : 'View stores nearby!!'}
         />
         {locationErrorMsg && <p>Something went wrong: {locationErrorMsg}</p>}
         {coffeeStoresByLocationError && <p>Something went wrong: {coffeeStoresByLocationError}</p>}
         <div className={styles.heroImage}>
-          <Image
-            src="/static/hero-image.png"
-            alt="hero-image"
-            width={700}
-            height={400}
-          />
+          <Image src="/static/hero-image.png" alt="hero-image" width={700} height={400} />
         </div>
         {coffeeStoresByLocation.length > 0 && (
           <div className={styles.sectionWrapper}>
@@ -106,7 +98,7 @@ export const getStaticProps = async () => {
   const resp = await getPlaces();
   return {
     props: {
-      coffeeStores: resp,
-    },
+      coffeeStores: resp
+    }
   };
 };

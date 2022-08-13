@@ -30,7 +30,7 @@ const useTrackLocation = () => {
     latLong,
     handleTrackLocation,
     locationErrorMsg,
-    isFindingLocation,
+    isFindingLocation
   };
 };
 

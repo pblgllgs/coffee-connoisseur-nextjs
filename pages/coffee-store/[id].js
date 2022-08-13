@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import styles from '../../styles/coffee-store.module.css';
 import cls from 'classnames';
 import axios from 'axios';
-import { getCommets, getPlace, normalizev2 } from '../../utils/normalize';
+import { getCommets, getPlace } from '../../utils/normalize';
 
 const CoffeeStore = ({ coffeeStore }) => {
   const router = useRouter();
@@ -31,43 +31,20 @@ const CoffeeStore = ({ coffeeStore }) => {
           <div className={styles.nameWrapper}>
             <h1 className={styles.name}>{name}</h1>
           </div>
-          <Image
-            src={img.imgUrl}
-            alt={name}
-            width={600}
-            height={360}
-            className={styles.storeImg}
-          />
+          <Image src={img.imgUrl} alt={name} width={600} height={360} className={styles.storeImg} />
         </div>
 
         <div className={cls('glass', styles.col2)}>
           <div className={styles.iconWrapper}>
-            <Image
-              src="/static/icons/places.svg"
-              width={24}
-              height={24}
-              alt={'icon'}
-            />
+            <Image src="/static/icons/places.svg" width={24} height={24} alt={'icon'} />
             <p className={styles.text}>{location.address}</p>
           </div>
           <div className={styles.iconWrapper}>
-            <Image
-              src="/static/icons/nearMe.svg"
-              width={24}
-              height={24}
-              alt={'icon'}
-            />
-            <p className={styles.text}>
-              {location.country === 'CL' ? 'Chile' : ''}
-            </p>
+            <Image src="/static/icons/nearMe.svg" width={24} height={24} alt={'icon'} />
+            <p className={styles.text}>{location.country === 'CL' ? 'Chile' : ''}</p>
           </div>
           <div className={styles.iconWrapper}>
-            <Image
-              src="/static/icons/star.svg"
-              width={24}
-              height={24}
-              alt={'icon'}
-            />
+            <Image src="/static/icons/star.svg" width={24} height={24} alt={'icon'} />
             <p className={styles.text}>1</p>
           </div>
           <button className={styles.upvoteButton} onClick={handleUpvoteButton}>
@@ -75,7 +52,7 @@ const CoffeeStore = ({ coffeeStore }) => {
           </button>
           <div className={styles.iconWrapper}>
             {commets.length > 0 &&
-              commets.slice(0,2).map((comment) => {
+              commets.slice(0, 2).map((comment) => {
                 return (
                   <div key={comment.created_at}>
                     <p className={styles.textComments}>{comment.created_at}</p>
@@ -97,8 +74,8 @@ export const getStaticPaths = async () => {
   const options = {
     url: 'https://api.foursquare.com/v3/places/search',
     headers: {
-      Authorization: process.env.NEXT_PUBLIC_AUTHORIZATION,
-    },
+      Authorization: process.env.NEXT_PUBLIC_AUTHORIZATION
+    }
   };
   const { data } = await axios.request(options);
   const { results } = data;
@@ -106,10 +83,10 @@ export const getStaticPaths = async () => {
   return {
     paths: idArr.map((id) => ({
       params: {
-        id,
-      },
+        id
+      }
     })),
-    fallback: true,
+    fallback: true
   };
 };
 
@@ -124,11 +101,11 @@ export const getStaticProps = async ({ params }) => {
   const commets = await getCommets(id);
   const respuesta = {
     ...resp,
-    commets,
+    commets
   };
   return {
     props: {
-      coffeeStore: respuesta,
-    },
+      coffeeStore: respuesta
+    }
   };
 };
