@@ -7,7 +7,7 @@ import cls from 'classnames';
 import axios from 'axios';
 import { getCommets, getPlace } from '../../utils/normalize';
 import { useContext, useEffect, useState } from 'react';
-import { StoreContext } from '../_app';
+import { StoreContext } from '../../store/storeContext';
 import { isEmpty } from '../../utils/index';
 
 const CoffeeStore = (initialProps) => {
