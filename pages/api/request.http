@@ -1,0 +1,3 @@
+
+
+GET http://localhost:3000/api/getCoffeeStoresByLocation?latLong=-33.4372,-70.6343&limit=6

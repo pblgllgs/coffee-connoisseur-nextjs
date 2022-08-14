@@ -5,21 +5,21 @@ class MyDocument extends Document {
     return (
       <Html lang="es">
         <Head>
-          <link
+          {/* <link
             rel="preload"
             href="/fonts/SourceCodePro-Bold.ttf"
-            as="font"
+            as="style"
             crossOrigin="anonymous"></link>
           <link
             rel="preload"
             href="/fonts/SourceCodePro-Regular.ttf"
-            as="font"
+            as="style"
             crossOrigin="anonymous"></link>
           <link
             rel="preload"
             href="/fonts/SourceCodePro-SemiBold.ttf"
-            as="font"
-            crossOrigin="anonymous"></link>
+            as="style"
+            crossOrigin="anonymous"></link> */}
         </Head>
         <body>
           <Main></Main>
