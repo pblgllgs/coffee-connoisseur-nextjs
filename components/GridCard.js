@@ -10,10 +10,10 @@ const GridCard = ({ coffeeStores, title = 'Stores near me' }) => {
         {coffeeStores.map((store) => {
           return (
             <Card
-              key={store.fsq_id}
-              href={`/coffee-store/${store.fsq_id}`}
+              key={store.id}
+              href={`/coffee-store/${store.id}`}
               name={store.name}
-              imgUrl={store.imgUrl.imgUrl}
+              imgUrl={store.imgUrl}
               className={styles.card}
             />
           );

@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Banner from '../components/Banner';
 import useTrackLocation from '../hooks/use-track-location';
 import styles from '../styles/Home.module.css';
-import { getPlaces } from '../utils/normalize';
+import { getPlaces, normalizePlaces } from '../utils/normalize';
 import { useContext, useEffect, useState } from 'react';
 import { ACTION_TYPES, StoreContext } from '../store/storeContext';
 import GridCard from '../components/GridCard';
@@ -65,9 +65,10 @@ export default function Home(props) {
 
 export const getStaticProps = async () => {
   const resp = await getPlaces();
+  const respNormalized = normalizePlaces(resp);
   return {
     props: {
-      coffeeStores: resp
+      coffeeStores: respNormalized
     }
   };
 };

@@ -5,21 +5,24 @@ class MyDocument extends Document {
     return (
       <Html lang="es">
         <Head>
-          {/* <link
-            rel="preload"
+          <link
+            rel="stylesheet preload prefetch"
             href="/fonts/SourceCodePro-Bold.ttf"
             as="style"
+            type="text/css"
             crossOrigin="anonymous"></link>
           <link
-            rel="preload"
+            rel="stylesheet preload prefetch"
             href="/fonts/SourceCodePro-Regular.ttf"
             as="style"
+            type="text/css"
             crossOrigin="anonymous"></link>
           <link
-            rel="preload"
+            rel="stylesheet preload prefetch"
             href="/fonts/SourceCodePro-SemiBold.ttf"
             as="style"
-            crossOrigin="anonymous"></link> */}
+            type="text/css"
+            crossOrigin="anonymous"></link>
         </Head>
         <body>
           <Main></Main>

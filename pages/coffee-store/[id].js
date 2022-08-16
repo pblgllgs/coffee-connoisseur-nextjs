@@ -4,8 +4,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import styles from '../../styles/coffee-store.module.css';
 import cls from 'classnames';
-import axios from 'axios';
-import { getCommets, getPlace } from '../../utils/normalize';
+import {
+  // getCommets,
+  getPlace,
+  getPlaces,
+  normalizePlace
+} from '../../utils/normalize';
 import { useContext, useEffect, useState } from 'react';
 import { StoreContext } from '../../store/storeContext';
 import { isEmpty } from '../../utils/index';
@@ -18,23 +22,53 @@ const CoffeeStore = (initialProps) => {
   const id = router.query.id;
 
   const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
-
   const {
     state: { coffeeStores }
   } = useContext(StoreContext);
 
+  const handleCreateCoffeeStore = async (coffeeStore) => {
+    try {
+      const { id, name, imgUrl, neighbourhood, address } = coffeeStore;
+      const response = await fetch('/api/createCoffeeStore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id,
+          name,
+          voting: 0,
+          neighbourhood: neighbourhood || '',
+          address: address || '',
+          imgUrl
+        })
+      });
+      const dbCoffeeStore = await response.json();
+      console.log({ dbCoffeeStore });
+    } catch (error) {
+      console.log('Error creando los places', error);
+    }
+  };
+
   useEffect(() => {
     if (isEmpty(initialProps.coffeeStore)) {
       if (coffeeStores.length > 0) {
-        const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
-          return coffeeStore.fsq_id === id;
+        const coffeeStoreFromContext = coffeeStores.find((coffeeStore) => {
+          return coffeeStore.id.toString() === id;
         });
-        setCoffeeStore(findCoffeeStoreById);
+        console.log('encontrado');
+        if (coffeeStoreFromContext) {
+          setCoffeeStore(coffeeStoreFromContext);
+          handleCreateCoffeeStore(coffeeStoreFromContext);
+        }
       }
+    } else {
+      handleCreateCoffeeStore(initialProps.coffeeStore);
     }
-  }, [id]);
+  }, [id, initialProps.coffeeStore, initialProps]);
 
-  const { location, name, img, commets } = coffeeStore;
+  const { address, name, imgUrl, voting } = coffeeStore;
+
   const handleUpvoteButton = () => {
     console.log('handle');
   };
@@ -55,7 +89,7 @@ const CoffeeStore = (initialProps) => {
           </div>
           <Image
             src={
-              img.imgUrl ||
+              imgUrl ||
               'https://gastronomiaycia.republica.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2021/12/lista_bar_2021_Schmucks-680x429.jpg.webp'
             }
             alt={name}
@@ -68,20 +102,20 @@ const CoffeeStore = (initialProps) => {
         <div className={cls('glass', styles.col2)}>
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/places.svg" width={24} height={24} alt={'icon'} />
-            <p className={styles.text}>{location.address}</p>
+            <p className={styles.text}>{address}</p>
           </div>
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/nearMe.svg" width={24} height={24} alt={'icon'} />
-            <p className={styles.text}>{location.country === 'CL' ? 'Chile' : ''}</p>
+            <p className={styles.text}>{address}</p>
           </div>
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/star.svg" width={24} height={24} alt={'icon'} />
-            <p className={styles.text}>1</p>
+            <p className={styles.text}>{voting}</p>
           </div>
           <button className={styles.upvoteButton} onClick={handleUpvoteButton}>
             Vote!!
           </button>
-          <div className={styles.iconWrapper}>
+          {/* <div className={styles.iconWrapper}>
             {commets.length > 0 &&
               commets.slice(0, 2).map((comment) => {
                 return (
@@ -91,7 +125,7 @@ const CoffeeStore = (initialProps) => {
                   </div>
                 );
               })}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
@@ -100,44 +134,34 @@ const CoffeeStore = (initialProps) => {
 
 export default CoffeeStore;
 
-// You should use getStaticPaths if you’re statically pre-rendering pages that use dynamic routes
-export const getStaticPaths = async () => {
-  const options = {
-    url: 'https://api.foursquare.com/v3/places/search',
-    headers: {
-      Authorization: process.env.NEXT_PUBLIC_AUTHORIZATION
-    }
-  };
-  const { data } = await axios.request(options);
-  const { results } = data;
-
-  const idArr = results.map((store) => String(store.fsq_id));
-  return {
-    paths: idArr.map((id) => ({
+export async function getStaticPaths() {
+  const coffeeStores = await getPlaces();
+  const paths = coffeeStores.map((coffeeStore) => {
+    return {
       params: {
-        id
+        id: coffeeStore.fsq_id.toString()
       }
-    })),
+    };
+  });
+  return {
+    paths,
     fallback: true
   };
-};
+}
 
-// You should use getStaticProps when:
-//- The data required to render the page is available at build time ahead of a user’s request.
-//- The data comes from a headless CMS.
-//- The data can be publicly cached (not user-specific).
-//- The page must be pre-rendered (for SEO) and be very fast — getStaticProps generates HTML and JSON files, both of which can be cached by a CDN for performance.
 export const getStaticProps = async ({ params }) => {
   const { id } = params;
   const resp = await getPlace(id);
-  const commets = await getCommets(id);
-  const respuesta = {
-    ...resp,
-    commets
-  };
+  // const commets = await getCommets(id);
+  // const respuesta = {
+  //   ...resp
+  //   commets
+  // };
+  const storeNormalized = normalizePlace(resp);
+  console.log(storeNormalized);
   return {
     props: {
-      coffeeStore: respuesta ? respuesta : {}
+      coffeeStore: storeNormalized ? storeNormalized : {}
     }
   };
 };

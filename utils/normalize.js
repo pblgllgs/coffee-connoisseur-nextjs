@@ -13,22 +13,18 @@ export const imgSearch = async (place) => {
   return img;
 };
 
-export const normalize = (places) => {
+export const normalizes = (places) => {
   const resp = places.map(async (store) => {
-    const img = await imgSearch(store);
-    return {
-      fsq_id: store.fsq_id,
-      imgUrl: img
-    };
+    return getImgObject(store);
   });
   return resp;
 };
 
-export const normalizev2 = async (place) => {
+export const getImgObject = async (place) => {
   const img = await imgSearch(place);
   return {
     fsq_id: place.fsq_id,
-    imgUrl: img
+    url: img
   };
 };
 
@@ -40,7 +36,7 @@ export const getPlace = async (id) => {
     }
   };
   const { data } = await axios.request(options);
-  const img = await normalizev2(data);
+  const img = await getImgObject(data);
   const resp = {
     ...data,
     img
@@ -68,12 +64,41 @@ export const getPlaces = async (latlong = '-33.4372,-70.6343', limit = 6) => {
   };
   const { data } = await axios.request(options);
   const { results } = data;
-  const imgs = await Promise.all(normalize(results));
+  const imgs = await Promise.all(normalizes(results));
   const resp = results.map((result) => {
     return {
       ...result,
-      imgUrl: imgs.find((img) => img.fsq_id === result.fsq_id)
+      img: imgs.find((img) => img.fsq_id === result.fsq_id)
     };
   });
   return resp;
+};
+
+export const normalizeRecord = (record) => {
+  return {
+    ...record.fields
+  };
+};
+
+export const normalizeRecords = (records) => {
+  return records.map((record) => normalizeRecord(record));
+};
+
+export const normalizePlaces = (places) => {
+  const normalizedPlaces = places.map((place) => {
+    return normalizePlace(place);
+  });
+  return normalizedPlaces;
+};
+
+export const normalizePlace = ({ fsq_id, location = '', name, img }) => {
+  const { address = 'Sin definir' } = location;
+  return {
+    id: fsq_id,
+    name,
+    address: address,
+    voting: 0,
+    neighbourhood: address,
+    imgUrl: img.url
+  };
 };
