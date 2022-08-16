@@ -22,5 +22,8 @@
     "react/react-in-jsx-scope": "off",
     "react/prop-types": 0,
     "no-debugger": "off"
+  },
+  "globals": {
+    "process": true
   }
 }
