@@ -4,32 +4,35 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import styles from '../../styles/coffee-store.module.css';
 import cls from 'classnames';
-import {
-  // getCommets,
-  getPlace,
-  getPlaces,
-  normalizePlace
-} from '../../utils/normalize';
+import { getComments, getPlace, getPlaces, normalizePlace } from '../../utils/normalize';
 import { useContext, useEffect, useState } from 'react';
-import { StoreContext } from '../../store/storeContext';
+import { ACTION_TYPES, StoreContext } from '../../store/storeContext';
 import { isEmpty } from '../../utils/index';
+import useSWR from 'swr';
+import confetti from 'canvas-confetti';
 
 const CoffeeStore = (initialProps) => {
   const router = useRouter();
-  if (router.isFallback) {
-    return <div>Loading...</div>;
-  }
+
   const id = router.query.id;
 
-  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
   const {
-    state: { coffeeStores }
+    state: { coffeeStores, votes },
+    dispatch
   } = useContext(StoreContext);
+
+  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+
+  const [statusVote, setStatusVote] = useState(false);
+
+  const { address, name, imgUrl } = coffeeStore;
+
+  const [votingCount, setVotingCount] = useState(0);
 
   const handleCreateCoffeeStore = async (coffeeStore) => {
     try {
       const { id, name, imgUrl, neighbourhood, address } = coffeeStore;
-      const response = await fetch('/api/createCoffeeStore', {
+      await fetch('/api/createCoffeeStore', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -43,8 +46,6 @@ const CoffeeStore = (initialProps) => {
           imgUrl
         })
       });
-      const dbCoffeeStore = await response.json();
-      console.log({ dbCoffeeStore });
     } catch (error) {
       console.log('Error creando los places', error);
     }
@@ -56,7 +57,6 @@ const CoffeeStore = (initialProps) => {
         const coffeeStoreFromContext = coffeeStores.find((coffeeStore) => {
           return coffeeStore.id.toString() === id;
         });
-        console.log('encontrado');
         if (coffeeStoreFromContext) {
           setCoffeeStore(coffeeStoreFromContext);
           handleCreateCoffeeStore(coffeeStoreFromContext);
@@ -65,13 +65,83 @@ const CoffeeStore = (initialProps) => {
     } else {
       handleCreateCoffeeStore(initialProps.coffeeStore);
     }
-  }, [id, initialProps.coffeeStore, initialProps]);
+  }, [id, initialProps.coffeeStore, initialProps, coffeeStores]);
 
-  const { address, name, imgUrl, voting } = coffeeStore;
+  const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, (url) =>
+    fetch(url).then((res) => res.json())
+  );
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setCoffeeStore(data[0]);
+      setVotingCount(data[0].voting);
+    }
+  }, [data]);
+
+  const handleUpvoteCoffeeStore = async (coffeeStore) => {
+    try {
+      const { id } = coffeeStore;
+      await fetch('/api/upvoteCoffeeStore', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id
+        })
+      });
+      setStatusVote(true);
+      dispatch({
+        type: ACTION_TYPES.ADD_VOTES,
+        payload: { id: coffeeStore.id }
+      });
+    } catch (error) {
+      console.log('Error creando los places', error);
+    }
+  };
 
   const handleUpvoteButton = () => {
-    console.log('handle');
+    const alreadyVote = votes.find((vote) => {
+      return vote === coffeeStore.id;
+    });
+    if (alreadyVote) {
+      setStatusVote(true);
+      return;
+    }
+    let count = votingCount + 1;
+    setVotingCount(count);
+    handleUpvoteCoffeeStore(coffeeStore);
+    confetti({
+      zIndex: 999,
+      particleCount: 100,
+      spread: 160,
+      angle: -100,
+      origin: {
+        x: 1,
+        y: 0
+      }
+    });
   };
+
+  const alreadyVote = votes.find((vote) => {
+    return vote === coffeeStore.id;
+  });
+
+  useEffect(() => {
+    if (alreadyVote) {
+      setStatusVote(true);
+      return;
+    }
+  }, [alreadyVote]);
+
+  if (error) {
+    return <div>Something went wrong retrieving data from server!!</div>;
+  }
+
+  if (router.isFallback) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className={styles.layout}>
       <Head>
@@ -81,7 +151,7 @@ const CoffeeStore = (initialProps) => {
         <div className={styles.col1}>
           <div className={styles.backToHomeLink}>
             <Link href="/">
-              <a>←Back to Home</a>
+              <a>←Volver atras</a>
             </Link>
           </div>
           <div className={styles.nameWrapper}>
@@ -110,14 +180,14 @@ const CoffeeStore = (initialProps) => {
           </div>
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/star.svg" width={24} height={24} alt={'icon'} />
-            <p className={styles.text}>{voting}</p>
+            <p className={styles.text}>{votingCount}</p>
           </div>
           <button className={styles.upvoteButton} onClick={handleUpvoteButton}>
-            Vote!!
+            {statusVote ? 'You already vote' : 'Vote!!'}
           </button>
-          {/* <div className={styles.iconWrapper}>
-            {commets.length > 0 &&
-              commets.slice(0, 2).map((comment) => {
+          <div className={styles.iconWrapper}>
+            {initialProps.comments.length > 0 &&
+              initialProps.comments.slice(0, 2).map((comment) => {
                 return (
                   <div key={comment.created_at}>
                     <p className={styles.textComments}>{comment.created_at}</p>
@@ -125,7 +195,7 @@ const CoffeeStore = (initialProps) => {
                   </div>
                 );
               })}
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
@@ -145,23 +215,30 @@ export async function getStaticPaths() {
   });
   return {
     paths,
-    fallback: true
+    fallback: 'blocking'
   };
 }
 
 export const getStaticProps = async ({ params }) => {
   const { id } = params;
-  const resp = await getPlace(id);
-  // const commets = await getCommets(id);
-  // const respuesta = {
-  //   ...resp
-  //   commets
-  // };
-  const storeNormalized = normalizePlace(resp);
-  console.log(storeNormalized);
-  return {
-    props: {
-      coffeeStore: storeNormalized ? storeNormalized : {}
+  try {
+    const resp = await getPlace(id);
+    const comments = await getComments(id);
+    const storeNormalized = normalizePlace(resp);
+    return {
+      props: {
+        coffeeStore: storeNormalized ? storeNormalized : {},
+        comments
+      }
+    };
+  } catch (error) {
+    if (error) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: '/'
+        }
+      };
     }
-  };
+  }
 };

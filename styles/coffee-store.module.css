@@ -12,6 +12,7 @@
 
 .col1 {
   place-self: center;
+  padding-right: 25px;
 }
 
 .backToHomeLink {
@@ -28,7 +29,7 @@
 }
 
 .name {
-  color: var(--text-white-100);
+  color: var(--text-purple);
   font-size: 2.25rem /* 36px */;
   line-height: 2.5rem /* 40px */;
   text-overflow: ellipsis;
@@ -61,6 +62,7 @@
   align-self: center;
   margin-top: 4rem /* 64px */;
   color: rgba(55, 59, 100, 1);
+  margin-right: 30px;
 }
 
 .iconWrapper {

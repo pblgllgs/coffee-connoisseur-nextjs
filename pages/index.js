@@ -36,7 +36,7 @@ export default function Home(props) {
       }
     };
     getPlacesBylocation();
-  }, [latLong]);
+  }, [latLong, dispatch]);
   return (
     <div className={styles.container}>
       <Head>
@@ -47,7 +47,7 @@ export default function Home(props) {
       <main className={styles.main}>
         <Banner
           handleOnClick={handleOnBannerBtnClick}
-          buttonText={isFindingLocation ? 'Locating...' : 'View stores nearby!!'}
+          buttonText={isFindingLocation ? 'Locating...' : 'Ver locales cercanos!!'}
         />
         {locationErrorMsg && <p>Something went wrong: {locationErrorMsg}</p>}
         {coffeeStoresError && <p>Something went wrong: {coffeeStoresError}</p>}
@@ -56,7 +56,7 @@ export default function Home(props) {
         </div>
         {coffeeStores.length > 0 && <GridCard coffeeStores={coffeeStores} />}
         {props.coffeeStores.length > 0 && (
-          <GridCard coffeeStores={props.coffeeStores} title="Santiago stores" />
+          <GridCard coffeeStores={props.coffeeStores} title="Locales en Santiago" />
         )}
       </main>
     </div>

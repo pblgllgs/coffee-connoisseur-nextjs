@@ -2,7 +2,7 @@ import React from 'react';
 import styles from '../styles/Home.module.css';
 import Card from './Card';
 
-const GridCard = ({ coffeeStores, title = 'Stores near me' }) => {
+const GridCard = ({ coffeeStores, title = 'Solo a metros de distancia' }) => {
   return (
     <div className={styles.sectionWrapper}>
       <h2 className={styles.heading2}>{title}</h2>

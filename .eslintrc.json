@@ -8,7 +8,8 @@
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:@next/next/recommended"
   ],
   "parserOptions": {
     "ecmaFeatures": {
@@ -17,13 +18,20 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": ["react"],
+  "plugins": ["react","react-hooks"],
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/prop-types": 0,
-    "no-debugger": "off"
+    "no-debugger": "off",
+    "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
+    "react-hooks/exhaustive-deps": "warn" // Checks effect dependencies
   },
   "globals": {
     "process": true
+  },
+  "settings": {
+    "react": {
+      "version": "18.2.0"
+    }
   }
 }

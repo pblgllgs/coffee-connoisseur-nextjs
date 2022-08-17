@@ -44,7 +44,7 @@ export const getPlace = async (id) => {
   return resp;
 };
 
-export const getCommets = async (id) => {
+export const getComments = async (id) => {
   const options = {
     url: `https://api.foursquare.com/v3/places/${id}/tips`,
     headers: {
@@ -80,8 +80,19 @@ export const normalizeRecord = (record) => {
   };
 };
 
+export const normalizeRecordWithId = (record) => {
+  return {
+    recordId: record.id,
+    ...record.fields
+  };
+};
+
 export const normalizeRecords = (records) => {
   return records.map((record) => normalizeRecord(record));
+};
+
+export const normalizeRecordsWithId = (records) => {
+  return records.map((record) => normalizeRecordWithId(record));
 };
 
 export const normalizePlaces = (places) => {
